@@ -6,6 +6,12 @@ Contiene algunos scripts correspondientes a la sección `quick start` de la docu
 ## example\_project\_2
 Contiene más ejemplos descritos en el notebook `quick_start.ipynb` sobre la creación de objetos `Mobjects` y secciones usando `MANIM`.
 
+## example\_project\_3
+Contiene ejemplos de como incoporar ecuaciones, texto y colores usando `MANIM`.
+
+## example\_project\_4
+Ejemplo que gráfica funciones e incorpora clases como `Axes`. 
+
 ## intro
 Contiene el notebook `intro_manim.ipynb` que es una guía rápida de instalación del framework `MANIM`. El archivo `manim-env.yml` contiene el ambiente `conda` creado para el entorno de trabajo. 
 
