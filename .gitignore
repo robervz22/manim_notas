@@ -1,3 +1,20 @@
 **/__pycache__/
+
+# Ignore all media directories
 **/media/
-!**/video_geometria/media/videos/scene/720p30/GeometryAreas.mp4
+
+# Unignore only `video_geometria/media/` and then the specific file
+!video_geometria/media/
+!video_geometria/media/videos/
+!video_geometria/media/videos/scene/
+!video_geometria/media/videos/scene/720p30/
+!video_geometria/media/videos/scene/720p30/GeometryAreas.mp4
+
+**/Tex/
+**/texts/
+**/images/
+**/partial_movie_files/
+video_geometria/media/videos/scene/720p30/SquareArea.mp4
+video_geometria/media/videos/scene/720p30/RectangleArea.mp4
+
+
