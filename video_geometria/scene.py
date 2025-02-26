@@ -272,14 +272,169 @@ class TriangleToParallelogram(Scene):
         self.wait(2)
         self.play(FadeOut(conclusion))
 
+class PolygonArea(Scene):
+    """Class that explains the area of a regular polygon
+
+    Args:
+        Scene (_type_): Scene Manim Type
+    """
+    def construct(self):
+         # Load the logo image (Replace 'logo.png' with your file)
+        logo = ImageMobject("logo_cimat.png").scale(0.3)  # Adjust size
+
+        # Position the logo at the bottom-left
+        logo.to_corner(UL)
+
+        # Create the author name text
+        author_text = Text("Autor: MC Roberto Vásquez Martínez", font_size=16).set_color(GRAY)
+
+        # Position the author name at the bottom-right
+        author_text.to_corner(DL,buff=0.15)
+
+        # Add them to the scene so they stay on screen
+        self.add(logo, author_text)
+
+        # Title 
+        title = Text("Área de un polígono regular", font_size=36,color=BLACK).to_edge(UP)
+        self.play(Write(title))
+        self.wait(2)
+
+        # Create a circle
+        circle = Circle(radius=2, color=BLACK)
+        center_dot = Dot(point=ORIGIN, color=BLACK)
+        center_dot_label = Tex("O",font_size=30).next_to(center_dot,0.5*DOWN).set_color(BLACK)
+
+        
+        # Get five equally spaced points on the circle
+        pentagon_vertices = [
+            circle.point_at_angle(i * TAU / 5) for i in range(5)
+        ]
+         # Calculate the midpoint of one pentagon side
+        mid_point = (pentagon_vertices[0] + pentagon_vertices[1]) / 2
+
+        # Create the apothem (a line from the center to the midpoint)
+        apothem = DashedLine(start= ORIGIN, end = mid_point, color=BLACK)
+        apothem_label = Tex("$a$", font_size = 40).next_to(apothem,LEFT).shift(RIGHT+0.3*UP).set_color(BLACK)
+
+        # Create the pentagon using these points
+        pentagon = Polygon(*pentagon_vertices, color=BLUE, fill_opacity=0.2)
+        pentagon_border = Polygon(*pentagon_vertices, color=RED)
+        pentagon_border_label = Tex(f"$p$").next_to(pentagon_border, RIGHT).set_color(RED) 
+
+        # Area formula with correct coloring
+        formula_area = MathTex(r"A = \frac{1}{2} \cdot", r" p ", r"\times a", color=BLACK)
+        formula_area.set_color_by_tex(" p ", RED)  # Make "p" red
+        formula_area.next_to(pentagon, DOWN, buff=0.5)
+
+        # Triangulation
+        first_triangle = Polygon(ORIGIN,pentagon_vertices[0],pentagon_vertices[1])
+        first_triangle.set_fill(BLUE, opacity=0.5)
+        first_triangle.set_stroke(RED, width=1)
+
+        triangle_example = VGroup(first_triangle,apothem)
+        triangle_grid = VGroup()
+        for i in range(1,5):
+            index_1 , index_2 = i%5 ,(i+1)%5
+            aux = Polygon(ORIGIN,pentagon_vertices[index_1],pentagon_vertices[index_2])
+            aux.set_fill(BLUE, opacity=0.5)
+            aux.set_stroke(RED, width=1)
+            triangle_grid.add(aux)
+
+        # Add everything to the scene
+        self.play(FadeIn(circle))
+        self.wait(1)
+        self.play(FadeIn(pentagon))
+        self.wait(1)
+        self.play(Create(pentagon_border),Write(pentagon_border_label))
+        self.wait(1)
+        self.play(Create(first_triangle))
+        center_dot_group = VGroup(center_dot,center_dot_label)
+        self.play(Create(center_dot_group))
+        self.wait(1)
+        self.play(Create(apothem),Write(apothem_label))
+        self.wait(2)
+        self.play(Write(formula_area))  # Use Write() instead of add()
+        self.wait(2)
+        self.play(FadeOut(center_dot_group))
+        self.play(Create(triangle_grid))
+        self.play(Create(center_dot_group))
+        self.wait(1)
+        self.play(FadeOut(apothem_label))
+
+        # Animation for explaining
+        self.play(triangle_example.animate.rotate(-7*PI/10,about_point = pentagon_vertices[0]).shift(RIGHT))
+        apothem_label = Tex("$a$", font_size = 40).next_to(apothem,RIGHT,buff=0.1).set_color(BLACK)
+        self.play(Write(apothem_label))
+        self.wait(1)
+        base_line = Line(start = triangle_example.get_corner(DL),
+                         end = triangle_example.get_corner(DR),color = RED)
+        base_label = Tex("$\\frac{p}{5}$").next_to(triangle_example,DOWN).set_color(RED)
+        self.play(Create(base_line),Write(base_label))
+        self.wait(2)
+
+        formula_triangle = MathTex(r"A' = \frac{1}{2} \cdot", r" \frac{p}{5} ", r"\times a", font_size = 35, color=BLACK)
+        formula_triangle.set_color_by_tex(r"\frac{p}{5} ", RED)  # Make "p" red
+        formula_triangle.next_to(triangle_example, 4*DOWN)
+        self.play(Write(formula_triangle))
+        self.wait(2)
+        formula_long = MathTex(r"A = 5\cdot A' = ", r"5\cdot \frac{1}{2} \cdot", r" \frac{p}{5} ", r"\times a", color=BLACK)
+        formula_long.set_color_by_tex(r"\frac{p}{5} ", RED)  # Make "p" red
+        formula_long.next_to(pentagon, DOWN, buff=0.5)
+        self.play(Transform(formula_area,formula_long))
+        self.wait(2)
+
+        # Fadeout and conclusion
+        labels = VGroup(title,base_label,apothem_label,pentagon_border_label,formula_area,formula_long,formula_triangle)
+        lines_points  = VGroup(apothem,pentagon_border,base_line)
+        polygons = VGroup(pentagon,triangle_example,triangle_grid,circle) 
+        self.play(FadeOut(labels,lines_points,polygons),FadeOut(center_dot_group))
+        self.wait(1)
+        conclusion = Tex(r"El área de un poligono regular de $n$ lados es $A = \frac{p \times a}{2}$", font_size=40).move_to(ORIGIN).set_color(BLACK)
+        conclusion_continuous = Tex(r"Se puede obtener como la suma de $n$ triángulos con la misma área!", font_size=40).next_to(conclusion,DOWN,buff=0.1).set_color(BLACK)
+        conclusion_group = VGroup(conclusion,conclusion_continuous)
+        self.play(Write(conclusion))
+        self.wait(1)
+        self.play(Write(conclusion_continuous))
+        self.wait(3)
+        self.play(FadeOut(conclusion_group))
 
 class GeometryAreas(Scene):
+    """Class that combines all the above explanations
+
+    Args:
+        Scene (_type_): Scene Manim Type
+    """
     def construct(self):
+        # Load the logo image (Replace 'logo.png' with your file)
+        logo = ImageMobject("logo_cimat.png").scale(0.3)  # Adjust size
+
+        # Position the logo at the bottom-left
+        logo.to_corner(UL)
+
+        # Create the author name text
+        author_text = Text("Autor: MC Roberto Vásquez Martínez", font_size=16).set_color(GRAY)
+
+        # Position the author name at the bottom-right
+        author_text.to_corner(DL,buff=0.15)
+
+        # Add them to the scene so they stay on screen
+        self.add(logo, author_text)
+
+        transition = Tex("Explicaremos como calcular el área de algunas figuras geométricas...", font_size=40).set_color(BLACK)
+        self.play(Write(transition))
+        self.wait(2)
+        self.play(FadeOut(transition))
+
+        transition = Tex(r"Empezaremos con un cuadrado de lado $l$...", font_size=40).set_color(BLACK)
+        self.play(Write(transition))
+        self.wait(2)
+        self.play(FadeOut(transition))
+
         # Run the first scene (Square Area)
         self.play_square_area()
         self.wait(1)
 
-        transition = Tex("Ahora veamos el área de un rectángulo...", font_size=50).set_color(BLACK)
+        transition = Tex("Ahora veamos el área de un rectángulo...", font_size=40).set_color(BLACK)
         self.play(Write(transition))
         self.wait(2)
         self.play(FadeOut(transition))
@@ -289,7 +444,7 @@ class GeometryAreas(Scene):
 
         self.wait(1)
 
-        transition = Tex("Ahora veamos el área de un paralelogramo...", font_size=50).set_color(BLACK)
+        transition = Tex("Ahora veamos el área de un paralelogramo...", font_size=40).set_color(BLACK)
         self.play(Write(transition))
         self.wait(2)
         self.play(FadeOut(transition))
@@ -299,12 +454,23 @@ class GeometryAreas(Scene):
 
         self.wait(1)
 
-        transition = Tex("Y para el área de un triángulo...", font_size=50).set_color(BLACK)
+        transition = Tex("Y para el área de un triángulo...", font_size=40).set_color(BLACK)
         self.play(Write(transition))
         self.wait(2)
         self.play(FadeOut(transition))
 
         self.play_triangle_area()
+
+        self.wait(1)
+
+        transition = Tex(r"Finalmente, para un polígono regular de $n$ lados...", font_size=40).set_color(BLACK)
+        self.play(Write(transition))
+        self.wait(2)
+        self.play(FadeOut(transition))
+
+        self.play_polygon_area()
+
+        self.play(FadeOut(author_text),FadeOut(logo))
 
     def play_square_area(self):
         title = Text("Área de un cuadrado", font_size=36, color=BLACK).to_edge(UP)
@@ -343,7 +509,7 @@ class GeometryAreas(Scene):
 
         self.play(FadeOut(VGroup(square, square_label, square_num_label, formula, formula_num, grid, annotations, title)))
         self.wait(1)
-        conclusion = Tex(r"Área de un cuadrado de lado $l$ es $l^2$!", font_size=50).move_to(ORIGIN).set_color(BLACK)
+        conclusion = Tex(r"El área de un cuadrado de lado $l$ es $l^2$!", font_size=40).move_to(ORIGIN).set_color(BLACK)
         self.play(Write(conclusion))
         self.wait(2)
         self.play(FadeOut(conclusion))
@@ -396,7 +562,7 @@ class GeometryAreas(Scene):
 
         self.play(FadeOut(VGroup(rect, grid, area_value, label_group, squares, annotations, title, )))
         self.wait(1)
-        conclusion = Tex(r"Área de un rectángulo de largo $l$ y ancho $w$ es $l\times w$!", font_size=50).move_to(ORIGIN).set_color(BLACK)
+        conclusion = Tex(r"El área de un rectángulo de largo $l$ y ancho $w$ es $l\times w$!", font_size=40).move_to(ORIGIN).set_color(BLACK)
         self.play(Write(conclusion))
         self.wait(2)
         self.play(FadeOut(conclusion))
@@ -536,3 +702,109 @@ class GeometryAreas(Scene):
         self.play(Write(conclusion))
         self.wait(2)
         self.play(FadeOut(conclusion))
+
+    def play_polygon_area(self):
+        # Title 
+        title = Text("Área de un polígono regular", font_size=36,color=BLACK).to_edge(UP)
+        self.play(Write(title))
+        self.wait(2)
+
+        # Create a circle
+        circle = Circle(radius=2, color=BLACK)
+        center_dot = Dot(point=ORIGIN, color=BLACK)
+        center_dot_label = Tex("O",font_size=30).next_to(center_dot,0.5*DOWN).set_color(BLACK)
+
+        
+        # Get five equally spaced points on the circle
+        pentagon_vertices = [
+            circle.point_at_angle(i * TAU / 5) for i in range(5)
+        ]
+         # Calculate the midpoint of one pentagon side
+        mid_point = (pentagon_vertices[0] + pentagon_vertices[1]) / 2
+
+        # Create the apothem (a line from the center to the midpoint)
+        apothem = DashedLine(start= ORIGIN, end = mid_point, color=BLACK)
+        apothem_label = Tex("$a$", font_size = 40).next_to(apothem,LEFT).shift(RIGHT+0.3*UP).set_color(BLACK)
+
+        # Create the pentagon using these points
+        pentagon = Polygon(*pentagon_vertices, color=BLUE, fill_opacity=0.2)
+        pentagon_border = Polygon(*pentagon_vertices, color=RED)
+        pentagon_border_label = Tex(f"$p$").next_to(pentagon_border, RIGHT).set_color(RED) 
+
+        # Area formula with correct coloring
+        formula_area = MathTex(r"A = \frac{1}{2} \cdot", r" p ", r"\times a", color=BLACK)
+        formula_area.set_color_by_tex(" p ", RED)  # Make "p" red
+        formula_area.next_to(pentagon, DOWN, buff=0.5)
+
+        # Triangulation
+        first_triangle = Polygon(ORIGIN,pentagon_vertices[0],pentagon_vertices[1])
+        first_triangle.set_fill(BLUE, opacity=0.5)
+        first_triangle.set_stroke(RED, width=1)
+
+        triangle_example = VGroup(first_triangle,apothem)
+        triangle_grid = VGroup()
+        for i in range(1,5):
+            index_1 , index_2 = i%5 ,(i+1)%5
+            aux = Polygon(ORIGIN,pentagon_vertices[index_1],pentagon_vertices[index_2])
+            aux.set_fill(BLUE, opacity=0.5)
+            aux.set_stroke(RED, width=1)
+            triangle_grid.add(aux)
+
+        # Add everything to the scene
+        self.play(FadeIn(circle))
+        self.wait(1)
+        self.play(FadeIn(pentagon))
+        self.wait(1)
+        self.play(Create(pentagon_border),Write(pentagon_border_label))
+        self.wait(1)
+        self.play(Create(first_triangle))
+        center_dot_group = VGroup(center_dot,center_dot_label)
+        self.play(Create(center_dot_group))
+        self.wait(1)
+        self.play(Create(apothem),Write(apothem_label))
+        self.wait(2)
+        self.play(Write(formula_area))  # Use Write() instead of add()
+        self.wait(2)
+        self.play(FadeOut(center_dot_group))
+        self.play(Create(triangle_grid))
+        self.play(Create(center_dot_group))
+        self.wait(1)
+        self.play(FadeOut(apothem_label))
+
+        # Animation for explaining
+        self.play(triangle_example.animate.rotate(-7*PI/10,about_point = pentagon_vertices[0]).shift(RIGHT))
+        apothem_label = Tex("$a$", font_size = 40).next_to(apothem,RIGHT,buff=0.1).set_color(BLACK)
+        self.play(Write(apothem_label))
+        self.wait(1)
+        base_line = Line(start = triangle_example.get_corner(DL),
+                         end = triangle_example.get_corner(DR),color = RED)
+        base_label = Tex("$\\frac{p}{5}$").next_to(triangle_example,DOWN).set_color(RED)
+        self.play(Create(base_line),Write(base_label))
+        self.wait(2)
+
+        formula_triangle = MathTex(r"A' = \frac{1}{2} \cdot", r" \frac{p}{5} ", r"\times a", font_size = 35, color=BLACK)
+        formula_triangle.set_color_by_tex(r"\frac{p}{5} ", RED)  # Make "p" red
+        formula_triangle.next_to(triangle_example, 4*DOWN)
+        self.play(Write(formula_triangle))
+        self.wait(2)
+        formula_long = MathTex(r"A = 5\cdot A' = ", r"5\cdot \frac{1}{2} \cdot", r" \frac{p}{5} ", r"\times a", color=BLACK)
+        formula_long.set_color_by_tex(r"\frac{p}{5} ", RED)  # Make "p" red
+        formula_long.next_to(pentagon, DOWN, buff=0.5)
+        self.play(Transform(formula_area,formula_long))
+        self.wait(2)
+
+        # Fadeout and conclusion
+        labels = VGroup(title,base_label,apothem_label,pentagon_border_label,formula_area,formula_long,formula_triangle)
+        lines_points  = VGroup(apothem,pentagon_border,base_line)
+        polygons = VGroup(pentagon,triangle_example,triangle_grid,circle) 
+        self.play(FadeOut(labels,lines_points,polygons),FadeOut(center_dot_group))
+        self.wait(1)
+        conclusion = Tex(r"El área de un poligono regular de $n$ lados es $A = \frac{p \times a}{2}$", font_size=40).move_to(ORIGIN).set_color(BLACK)
+        conclusion_continuous = Tex(r"Se puede obtener como la suma de $n$ triángulos con la misma área!", font_size=40).next_to(conclusion,DOWN,buff=0.1).set_color(BLACK)
+        conclusion_group = VGroup(conclusion,conclusion_continuous)
+        self.play(Write(conclusion))
+        self.wait(1)
+        self.play(Write(conclusion_continuous))
+        self.wait(3)
+        self.play(FadeOut(conclusion_group))
+    
